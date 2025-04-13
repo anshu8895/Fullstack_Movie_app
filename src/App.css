@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  overflow-x: hidden; /* Add this to prevent horizontal scrolling */
 }
 
 .logo {
@@ -39,4 +40,320 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Movie Details Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  width: 100%; /* Ensure it's not exceeding viewport width */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.movie-details-modal {
+  background-color: #1a1a2e;
+  border-radius: 10px;
+  width: 95%; /* Increased from 90% to 95% */
+  max-width: 1100px; /* Increased from 900px to 1100px */
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.movie-details-content {
+  display: flex;
+  flex-direction: column;
+  padding: 30px; /* Increased from 20px to 30px for more breathing room */
+  color: white;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+@media (min-width: 768px) {
+  .movie-details-content {
+    flex-direction: row;
+    gap: 40px; /* Increased from 30px to 40px */
+  }
+}
+
+.movie-poster {
+  flex-shrink: 0;
+}
+
+.movie-poster img {
+  width: 100%;
+  max-width: 350px; /* Increased from 300px to 350px */
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.movie-info {
+  flex-grow: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.movie-info h2 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: white;
+}
+
+.tagline {
+  font-style: italic;
+  color: #b8b8b8;
+  margin-top: 0;
+}
+
+.meta-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #b8b8b8;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: gold;
+}
+
+.rating img {
+  width: 20px;
+  height: 20px;
+}
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.genre {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.overview h3, .cast h3, .trailers h3 {
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+  color: #f0f0f0;
+}
+
+.overview p {
+  line-height: 1.6;
+  color: #d0d0d0;
+}
+
+.cast-list {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 15px;
+}
+
+.cast-member {
+  min-width: 100px;
+  max-width: 100px;
+}
+
+.cast-member img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.cast-member p {
+  margin-top: 5px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.cast-member p.character {
+  color: #b8b8b8;
+  font-style: italic;
+}
+
+.trailer-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  max-width: 100%; /* Ensure video container doesn't exceed parent width */
+}
+
+.trailer-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.loading, .error {
+  padding: 40px;
+  text-align: center;
+  font-size: 18px;
+  color: white;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+/* Add some hover effect to movie cards to indicate they're clickable */
+.movie-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.movie-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Add image zoom effect on hover */
+.movie-card img {
+  transition: transform 0.4s ease;
+}
+
+.movie-card:hover img {
+  transform: scale(1.08);
+}
+
+/* Add subtle glow effect behind the card */
+.movie-card::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 14px;
+  background: linear-gradient(45deg, #AB8BFF, #D6C7FF);
+  z-index: -1;
+  filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.movie-card:hover::before {
+  opacity: 0.4;
+  animation: glowPulse 2.5s infinite alternate;
+}
+
+/* Create a more subtle pulsing animation for the glow */
+@keyframes glowPulse {
+  from {
+    opacity: 0.3;
+    filter: blur(12px);
+  }
+  to {
+    opacity: 0.5;
+    filter: blur(15px);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add footer styles */
+.footer {
+  width: 100%;
+  padding: 2rem 0;
+  margin-top: 4rem;
+  background-color: #0f0d23;
+  border-top: 1px solid rgba(206, 206, 251, 0.1);
+}
+
+.footer-content {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.footer p {
+  color: #9ca4ab;
+  font-size: 0.875rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-link {
+  color: #a8b5db;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #cecefb;
 }

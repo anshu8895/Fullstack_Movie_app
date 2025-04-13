@@ -21,6 +21,12 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden; /* Prevent horizontal scroll on the entire page */
+    width: 100%;
+    position: relative;
+  }
+
   body {
     font-family: "DM Sans", serif;
     font-optical-sizing: auto;
@@ -36,7 +42,7 @@
   }
 
   main {
-    @apply min-h-screen relative bg-primary;
+    @apply min-h-screen relative bg-primary overflow-x-hidden; /* Add overflow-x: hidden to main */
   }
 
   header {
@@ -50,11 +56,11 @@
 
 @layer components {
   .pattern {
-    @apply bg-hero-pattern w-screen h-screen bg-center bg-cover absolute z-0;
+    @apply fixed top-0 left-0 bg-hero-pattern w-full h-screen bg-center bg-cover z-0; /* Changed w-screen to w-full and fixed positioning */
   }
 
   .wrapper {
-    @apply px-5 py-12 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
+    @apply px-5 py-12 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10 overflow-x-hidden; /* Add overflow-x: hidden */
   }
 
   .trending {
@@ -69,7 +75,7 @@
     }
 
     & ul li p {
-      @apply fancy-text mt-[22px] text-nowrap;
+      @apply fancy-text mt-[22px] overflow-hidden; /* Remove text-nowrap to prevent overflow */
     }
 
     & ul li img {
@@ -109,7 +115,10 @@
     }
 
     & h3 {
-      @apply text-white font-bold text-base line-clamp-1;
+      @apply text-white font-bold text-base;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     & .content {
@@ -148,8 +157,11 @@
 
 @utility fancy-text {
   -webkit-text-stroke: 5px rgba(206, 206, 251, 0.5);
-  font-size: 190px;
+  font-size: clamp(100px, 15vw, 190px); /* Make font size responsive */
   font-family: "Bebas Neue", sans-serif;
+  white-space: nowrap; /* Keep text on one line */
+  text-overflow: ellipsis; /* Add ellipsis if text overflows */
+  overflow: hidden; /* Hide overflow */
 }
 
 @utility hide-scrollbar {
