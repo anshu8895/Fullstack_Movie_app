@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css'; // Add this import for the CSS styles
 import Search from './components/Search';
 import Spinner from './components/Spinner';
@@ -25,7 +25,7 @@ const API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [errorMesage, setErrorMesage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [moviesList, setMoviesList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [trendingMovies, setTrendingMovies] = useState([]);
@@ -44,13 +44,37 @@ const App = () => {
     document.body.style.overflow = 'auto'; // Re-enable scrolling
   };
 
+  const handleTrendingMovieClick = async (trendingMovie) => {
+    // Fetch full movie details from TMDB using the movie_id
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/movie/${trendingMovie.movie_id}?api_key=${API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch movie details');
+      }
+      
+      const movieData = await response.json();
+      handleSelectMovie(movieData);
+    } catch (error) {
+      console.error('Error fetching trending movie details:', error);
+      // Fallback: create a basic movie object from trending data
+      handleSelectMovie({
+        id: trendingMovie.movie_id,
+        title: trendingMovie.title,
+        poster_path: trendingMovie.poster_url?.replace('https://image.tmdb.org/t/p/w500', ''),
+      });
+    }
+  };
+
   const fetchMovies = async (query = '') => {
     setIsLoading(true);
-    setErrorMesage('');
+    setErrorMessage('');
 
     // Check if API key is available
     if (!API_KEY) {
-      setErrorMesage('API key is missing. Please check your .env file.');
+      setErrorMessage('API key is missing. Please check your .env file.');
       setIsLoading(false);
       return;
     }
@@ -69,7 +93,7 @@ const App = () => {
       }
 
       if (data.Response === 'False') {
-        setErrorMesage(data.Error || 'Error fetching movies');
+        setErrorMessage(data.Error || 'Error fetching movies');
         setMoviesList([]);
         return;
       }
@@ -82,7 +106,7 @@ const App = () => {
 
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
-      setErrorMesage('Error fetching movies. Please try again later.');
+      setErrorMessage('Error fetching movies. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +137,7 @@ const App = () => {
       <div className="wrapper">
         <header>
           <img src="./hero.png" alt="" />
-          <h1>Find <span className='text-gradient'>Movies</span> You'll Enjoy Without the Hassle</h1>
+          <h1>Find <span className='text-gradient'>Movies</span> You&apos;ll Enjoy Without the Hassle</h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
@@ -122,7 +146,12 @@ const App = () => {
             <h2>Trending Movies</h2>
             <ul>
               {trendingMovies.map((movie, index) => (
-                <li key={movie.$id}>
+                <li 
+                  key={movie.$id} 
+                  onClick={() => handleTrendingMovieClick(movie)}
+                  style={{ cursor: 'pointer' }}
+                  title={`Click to see details: ${movie.title || 'Movie'}`}
+                >
                   <p>{index + 1}</p>
                   <img src={movie.poster_url} alt={movie.title} />
                 </li>
@@ -135,8 +164,8 @@ const App = () => {
           <h2>All Movies</h2>
           {isLoading ? (
             <Spinner />
-          ) : errorMesage ? (
-            <p className='text-red-500'>{errorMesage}</p>
+          ) : errorMessage ? (
+            <p className='text-red-500'>{errorMessage}</p>
           ) : (
             <ul>
               {moviesList.map((movie) => (

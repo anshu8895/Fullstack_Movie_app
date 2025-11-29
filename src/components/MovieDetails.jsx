@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
 const MovieDetails = ({ movie, onClose }) => {
   const [movieDetails, setMovieDetails] = useState(null);
@@ -13,6 +14,7 @@ const MovieDetails = ({ movie, onClose }) => {
       if (!movie) return;
       
       setLoading(true);
+      setError('');
       try {
         const response = await fetch(
           `${API_BASE_URL}/movie/${movie.id}?api_key=${API_KEY}&append_to_response=credits,videos`
@@ -33,7 +35,8 @@ const MovieDetails = ({ movie, onClose }) => {
     };
 
     fetchMovieDetails();
-  }, [movie, API_KEY]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movie?.id]);
 
   if (!movie) return null;
 
@@ -64,10 +67,10 @@ const MovieDetails = ({ movie, onClose }) => {
               <div className="meta-info">
                 <span className="rating">
                   <img src="./star.svg" alt="Rating" />
-                  {movieDetails.vote_average.toFixed(1)}
+                  {movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : 'N/A'}
                 </span>
                 <span className="year">{movieDetails.release_date?.split('-')[0] || 'N/A'}</span>
-                <span className="runtime">{movieDetails.runtime} min</span>
+                <span className="runtime">{movieDetails.runtime ? `${movieDetails.runtime} min` : 'N/A'}</span>
               </div>
               
               <div className="genres">
@@ -127,6 +130,15 @@ const MovieDetails = ({ movie, onClose }) => {
       </div>
     </div>
   );
+};
+
+MovieDetails.propTypes = {
+  movie: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string,
+    poster_path: PropTypes.string,
+  }),
+  onClose: PropTypes.func.isRequired,
 };
 
 export default MovieDetails;
