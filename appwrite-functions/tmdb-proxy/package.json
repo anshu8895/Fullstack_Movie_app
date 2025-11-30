@@ -1,0 +1,13 @@
+{
+  "name": "tmdb-proxy",
+  "version": "1.0.0",
+  "description": "TMDB API proxy to bypass ISP blocking",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

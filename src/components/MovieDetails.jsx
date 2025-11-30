@@ -1,30 +1,20 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { getMovieDetails } from '../tmdbAPI';
 
 const MovieDetails = ({ movie, onClose }) => {
   const [movieDetails, setMovieDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const API_BASE_URL = 'https://api.themoviedb.org/3';
-  const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-
   useEffect(() => {
-    const fetchMovieDetails = async () => {
+    const fetchMovieDetailsData = async () => {
       if (!movie) return;
       
       setLoading(true);
       setError('');
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/movie/${movie.id}?api_key=${API_KEY}&append_to_response=credits,videos`
-        );
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch movie details');
-        }
-        
-        const data = await response.json();
+        const data = await getMovieDetails(movie.id);
         setMovieDetails(data);
       } catch (error) {
         console.error('Error fetching movie details:', error);
@@ -34,7 +24,7 @@ const MovieDetails = ({ movie, onClose }) => {
       }
     };
 
-    fetchMovieDetails();
+    fetchMovieDetailsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movie?.id]);
 

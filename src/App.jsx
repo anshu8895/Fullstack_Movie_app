@@ -7,21 +7,14 @@ import MovieDetails from './components/MovieDetails';
 import Footer from './components/Footer';
 import { useDebounce } from 'react-use';
 import { getTrendingMovies, updateSearchCount } from './appwrite';
+import { searchMovies, discoverMovies, getMovieDetails } from './tmdbAPI';
 
-const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
-// Check if API key is available
+// Check if API key is available (only needed for direct API calls)
 if (!API_KEY) {
-  console.warn('Warning: TMDB API key is missing. Please check your .env file.');
+  console.warn('Warning: TMDB API key is missing. Proxy mode may still work.');
 }
-
-const API_OPTIONS = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-  },
-};
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,15 +40,7 @@ const App = () => {
   const handleTrendingMovieClick = async (trendingMovie) => {
     // Fetch full movie details from TMDB using the movie_id
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/movie/${trendingMovie.movie_id}?api_key=${API_KEY}`
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch movie details');
-      }
-      
-      const movieData = await response.json();
+      const movieData = await getMovieDetails(trendingMovie.movie_id);
       handleSelectMovie(movieData);
     } catch (error) {
       console.error('Error fetching trending movie details:', error);
@@ -72,25 +57,9 @@ const App = () => {
     setIsLoading(true);
     setErrorMessage('');
 
-    // Check if API key is available
-    if (!API_KEY) {
-      setErrorMessage('API key is missing. Please check your .env file.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // Append api_key as a query parameter instead of using Authorization header
-      const endpoint = query
-        ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}` 
-        : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc`;
-      
-      const response = await fetch(endpoint, API_OPTIONS);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(`Error fetching movies: ${data.status_message || response.status}`);
-      }
+      // Use the proxy API helper functions
+      const data = query ? await searchMovies(query) : await discoverMovies();
 
       if (data.Response === 'False') {
         setErrorMessage(data.Error || 'Error fetching movies');
@@ -145,17 +114,19 @@ const App = () => {
           <section className='trending'>
             <h2>Trending Movies</h2>
             <ul>
-              {trendingMovies.map((movie, index) => (
-                <li 
-                  key={movie.$id} 
-                  onClick={() => handleTrendingMovieClick(movie)}
-                  style={{ cursor: 'pointer' }}
-                  title={`Click to see details: ${movie.title || 'Movie'}`}
-                >
-                  <p>{index + 1}</p>
-                  <img src={movie.poster_url} alt={movie.title} />
-                </li>
-              ))}
+              {trendingMovies
+                .filter((movie) => movie.poster_url && movie.poster_url.trim() !== '')
+                .map((movie, index) => (
+                  <li 
+                    key={movie.$id} 
+                    onClick={() => handleTrendingMovieClick(movie)}
+                    style={{ cursor: 'pointer' }}
+                    title={`Click to see details: ${movie.title || 'Movie'}`}
+                  >
+                    <p>{index + 1}</p>
+                    <img src={movie.poster_url} alt={movie.title} />
+                  </li>
+                ))}
             </ul>
           </section>
         )}

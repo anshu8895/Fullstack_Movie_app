@@ -25,6 +25,12 @@ export const updateSearchCount = async (searchTerm, movie) => {
         return;
     }
 
+    // Skip if movie doesn't have a poster
+    if (!movie.poster_path || movie.poster_path.trim() === '') {
+        console.warn('Skipping updateSearchCount: Movie has no poster');
+        return;
+    }
+
     // 1. Use Appwrite SDK to check if the search term exists in the database
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
