@@ -38,41 +38,52 @@
 
 ## Step 4️⃣: Add Code (2 minutes)
 
-### Option A: Using Manual Code Upload (Easiest)
+### Option A: Upload Pre-built Archive (Easiest & Recommended)
 
 1. Click **"Deployments"** tab (at the top)
 2. Click **"Create deployment"** button (top right, pink/red button)
 3. Choose **"Manual"** as deployment source
-4. You'll see a code editor
+4. You'll see an upload interface
 
-5. **Create the files**:
+5. **Upload the deployment file**:
+   - Click **"Browse"** or drag-and-drop area
+   - Navigate to your project folder: `appwrite-functions/tmdb-proxy/`
+   - Select the file: **`deployment.tar.gz`**
+   - Click **"Open"** to upload
+
+6. The file will upload automatically (takes 5-10 seconds)
+
+### Option B: Using Manual Code Entry (Alternative)
+
+If you don't have the .tar.gz file, you can manually create the files:
+
+1. Click **"Deployments"** tab
+2. Click **"Create deployment"** → Choose **"Manual"**
+3. In the code editor:
    
    **First, create `package.json`:**
-   - Click the file name area and rename from `index.js` to `package.json`
-   - Delete any existing content
-   - Paste this:
+   - Rename from `index.js` to `package.json`
+   - Paste:
+   ```json
+   {
+     "name": "tmdb-proxy",
+     "version": "1.0.0",
+     "description": "TMDB API proxy",
+     "main": "src/main.js",
+     "type": "module",
+     "dependencies": {
+       "node-fetch": "^3.3.2"
+     }
+   }
+   ```
+   
+   **Then, add `src/main.js`:**
+   - Click **"+ Add file"**
+   - Name it: `src/main.js`
+   - Copy all code from `appwrite-functions/tmdb-proxy/src/main.js`
+   - Paste into editor
 
-```json
-{
-  "name": "tmdb-proxy",
-  "version": "1.0.0",
-  "description": "TMDB API proxy",
-  "main": "src/main.js",
-  "type": "module",
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  }
-}
-```
-
-6. **Add `src/main.js`:**
-   - Click **"+ Add file"** button
-   - Name it: `src/main.js` (include the `src/` prefix)
-   - Open `appwrite-functions/tmdb-proxy/src/main.js` from your local project
-   - **Copy ALL the code** from that file
-   - **Paste** into the Appwrite editor
-
-### Option B: Using GitHub (If you prefer)
+### Option C: Using GitHub (Advanced)
 
 1. Click **"Deployments"** tab
 2. Click **"Create deployment"** → Choose **"GitHub"**
