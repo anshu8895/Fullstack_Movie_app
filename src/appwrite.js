@@ -51,7 +51,9 @@ export const updateSearchCount = async (searchTerm, movie) => {
                 count: 1,
                 movie_id: movie.id,
                 title: movie.title || searchTerm,
-                poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                poster_url: movie.poster_path?.startsWith('http')
+                    ? movie.poster_path
+                    : `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
             });
         }
     } catch (error) {

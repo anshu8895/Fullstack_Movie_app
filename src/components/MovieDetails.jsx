@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { getMovieDetails } from '../tmdbAPI';
 
+// Safely build an image URL: if path is already a full URL (OMDb), use it as-is.
+const getImageUrl = (path, size = 'w500') => {
+  if (!path) return './no-movie.png';
+  if (path.startsWith('http')) return path;
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+};
+
 const MovieDetails = ({ movie, onClose }) => {
   const [movieDetails, setMovieDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +17,7 @@ const MovieDetails = ({ movie, onClose }) => {
   useEffect(() => {
     const fetchMovieDetailsData = async () => {
       if (!movie) return;
-      
+
       setLoading(true);
       setError('');
       try {
@@ -34,7 +41,7 @@ const MovieDetails = ({ movie, onClose }) => {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="movie-details-modal" onClick={(e) => e.stopPropagation()}>
         <button className="close-button" onClick={onClose}>×</button>
-        
+
         {loading ? (
           <div className="loading">Loading...</div>
         ) : error ? (
@@ -42,18 +49,16 @@ const MovieDetails = ({ movie, onClose }) => {
         ) : movieDetails ? (
           <div className="movie-details-content">
             <div className="movie-poster">
-              <img 
-                src={movieDetails.poster_path 
-                  ? `https://image.tmdb.org/t/p/w500/${movieDetails.poster_path}` 
-                  : './no-movie.png'} 
-                alt={movieDetails.title} 
+              <img
+                src={getImageUrl(movieDetails.poster_path)}
+                alt={movieDetails.title}
               />
             </div>
-            
+
             <div className="movie-info">
               <h2>{movieDetails.title}</h2>
               {movieDetails.tagline && <p className="tagline">{movieDetails.tagline}</p>}
-              
+
               <div className="meta-info">
                 <span className="rating">
                   <img src="./star.svg" alt="Rating" />
@@ -62,29 +67,27 @@ const MovieDetails = ({ movie, onClose }) => {
                 <span className="year">{movieDetails.release_date?.split('-')[0] || 'N/A'}</span>
                 <span className="runtime">{movieDetails.runtime ? `${movieDetails.runtime} min` : 'N/A'}</span>
               </div>
-              
+
               <div className="genres">
                 {movieDetails.genres?.map(genre => (
                   <span key={genre.id} className="genre">{genre.name}</span>
                 ))}
               </div>
-              
+
               <div className="overview">
                 <h3>Overview</h3>
                 <p>{movieDetails.overview}</p>
               </div>
-              
+
               {movieDetails.credits?.cast?.length > 0 && (
                 <div className="cast">
                   <h3>Cast</h3>
                   <div className="cast-list">
                     {movieDetails.credits.cast.slice(0, 5).map(actor => (
                       <div key={actor.id} className="cast-member">
-                        <img 
-                          src={actor.profile_path 
-                            ? `https://image.tmdb.org/t/p/w200/${actor.profile_path}` 
-                            : './no-movie.png'} 
-                          alt={actor.name} 
+                        <img
+                          src={getImageUrl(actor.profile_path, 'w200')}
+                          alt={actor.name}
                         />
                         <p>{actor.name}</p>
                         <p className="character">{actor.character}</p>
@@ -93,7 +96,7 @@ const MovieDetails = ({ movie, onClose }) => {
                   </div>
                 </div>
               )}
-              
+
               {movieDetails.videos?.results?.length > 0 && (
                 <div className="trailers">
                   <h3>Trailers</h3>
@@ -124,7 +127,7 @@ const MovieDetails = ({ movie, onClose }) => {
 
 MovieDetails.propTypes = {
   movie: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     title: PropTypes.string,
     poster_path: PropTypes.string,
   }),

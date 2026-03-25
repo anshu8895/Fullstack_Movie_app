@@ -7,7 +7,7 @@ import MovieDetails from './components/MovieDetails';
 import Footer from './components/Footer';
 import { useDebounce } from 'react-use';
 import { getTrendingMovies, updateSearchCount } from './appwrite';
-import { searchMovies, discoverMovies, getMovieDetails } from './tmdbAPI';
+import { searchMovies, discoverMovies } from './tmdbAPI';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
@@ -37,20 +37,21 @@ const App = () => {
     document.body.style.overflow = 'auto'; // Re-enable scrolling
   };
 
-  const handleTrendingMovieClick = async (trendingMovie) => {
-    // Fetch full movie details from TMDB using the movie_id
-    try {
-      const movieData = await getMovieDetails(trendingMovie.movie_id);
-      handleSelectMovie(movieData);
-    } catch (error) {
-      console.error('Error fetching trending movie details:', error);
-      // Fallback: create a basic movie object from trending data
-      handleSelectMovie({
-        id: trendingMovie.movie_id,
-        title: trendingMovie.title,
-        poster_path: trendingMovie.poster_url?.replace('https://image.tmdb.org/t/p/w500', ''),
-      });
-    }
+  // Cleanup: restore scroll if the component unmounts while the modal is open
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  const handleTrendingMovieClick = (trendingMovie) => {
+    // Open the modal immediately with basic data — MovieDetails will fetch full details on its own,
+    // exactly the same way regular movie cards work (no pre-fetch delay).
+    handleSelectMovie({
+      id: trendingMovie.movie_id,
+      title: trendingMovie.title,
+      poster_path: trendingMovie.poster_url,
+    });
   };
 
   const fetchMovies = async (query = '') => {
@@ -60,12 +61,6 @@ const App = () => {
     try {
       // Use the proxy API helper functions
       const data = query ? await searchMovies(query) : await discoverMovies();
-
-      if (data.Response === 'False') {
-        setErrorMessage(data.Error || 'Error fetching movies');
-        setMoviesList([]);
-        return;
-      }
 
       setMoviesList(data.results || []);
 
@@ -117,8 +112,8 @@ const App = () => {
               {trendingMovies
                 .filter((movie) => movie.poster_url && movie.poster_url.trim() !== '')
                 .map((movie, index) => (
-                  <li 
-                    key={movie.$id} 
+                  <li
+                    key={movie.$id}
                     onClick={() => handleTrendingMovieClick(movie)}
                     style={{ cursor: 'pointer' }}
                     title={`Click to see details: ${movie.title || 'Movie'}`}
@@ -140,9 +135,9 @@ const App = () => {
           ) : (
             <ul>
               {moviesList.map((movie) => (
-                <MovieCard 
-                  key={movie.id} 
-                  movie={movie} 
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
                   onSelectMovie={handleSelectMovie}
                 />
               ))}
@@ -152,12 +147,12 @@ const App = () => {
       </div>
 
       {selectedMovie && (
-        <MovieDetails 
+        <MovieDetails
           movie={selectedMovie}
           onClose={handleCloseModal}
         />
       )}
-      
+
       <Footer />
     </main>
   );

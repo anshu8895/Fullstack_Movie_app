@@ -17,32 +17,27 @@ const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 export const fetchFromTMDB = async (endpoint, params = {}) => {
   if (USE_PROXY && APPWRITE_FUNCTION_URL) {
     // Use Appwrite proxy
-    try {
-      const response = await fetch(APPWRITE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          endpoint,
-          params
-        })
-      });
+    const response = await fetch(APPWRITE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ endpoint, params }),
+    });
 
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Proxy request failed');
-      }
-
-      return result.data;
-    } catch (error) {
-      console.error('Proxy error, falling back to direct API:', error);
-      // Fallback to direct API if proxy fails
-      return fetchDirect(endpoint, params);
+    if (!response.ok) {
+      throw new Error(`Proxy returned HTTP ${response.status}`);
     }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Proxy request failed');
+    }
+
+    return result.data;
   } else {
-    // Use direct TMDB API
+    // Direct TMDB API — only works server-side (no CORS). Kept for completeness.
     return fetchDirect(endpoint, params);
   }
 };

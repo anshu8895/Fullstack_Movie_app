@@ -1,29 +1,30 @@
 import fetch from 'node-fetch';
 
+// Shared CORS headers applied to every response
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Appwrite-Project, X-Appwrite-Key',
+};
+
 export default async ({ req, res, log, error }) => {
-  // Enable CORS
+  // Handle CORS preflight — must be 204 with empty body, NOT JSON
   if (req.method === 'OPTIONS') {
-    return res.json({
-      status: 'ok'
-    }, 200, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Appwrite-Project, X-Appwrite-Key'
-    });
+    return res.empty
+      ? res.empty(corsHeaders)                          // Appwrite SDK ≥ 4 provides res.empty()
+      : res.send('', 204, corsHeaders);                 // fallback for older runtimes
   }
 
   try {
     // Get TMDB API key from environment variable
     const TMDB_API_KEY = process.env.TMDB_API_KEY;
-    
+
     if (!TMDB_API_KEY) {
       error('TMDB_API_KEY is not set in environment variables');
       return res.json({
         success: false,
         error: 'TMDB API key not configured'
-      }, 500, {
-        'Access-Control-Allow-Origin': '*'
-      });
+      }, 500, corsHeaders);
     }
 
     // Parse the request body to get the endpoint and query params
@@ -34,9 +35,7 @@ export default async ({ req, res, log, error }) => {
       return res.json({
         success: false,
         error: 'Endpoint is required'
-      }, 400, {
-        'Access-Control-Allow-Origin': '*'
-      });
+      }, 400, corsHeaders);
     }
 
     // Build the TMDB API URL
@@ -47,7 +46,7 @@ export default async ({ req, res, log, error }) => {
     });
 
     const tmdbUrl = `${baseUrl}${endpoint}?${urlParams}`;
-    
+
     log(`Fetching: ${tmdbUrl.replace(TMDB_API_KEY, 'API_KEY_HIDDEN')}`);
 
     // Make request to TMDB
@@ -66,27 +65,20 @@ export default async ({ req, res, log, error }) => {
         success: false,
         error: data.status_message || 'TMDB API error',
         statusCode: tmdbResponse.status
-      }, tmdbResponse.status, {
-        'Access-Control-Allow-Origin': '*'
-      });
+      }, tmdbResponse.status, corsHeaders);
     }
 
     // Return successful response
     return res.json({
       success: true,
       data: data
-    }, 200, {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/json'
-    });
+    }, 200, corsHeaders);
 
   } catch (err) {
     error(`Error in proxy function: ${err.message}`);
     return res.json({
       success: false,
       error: err.message
-    }, 500, {
-      'Access-Control-Allow-Origin': '*'
-    });
+    }, 500, corsHeaders);
   }
 };
